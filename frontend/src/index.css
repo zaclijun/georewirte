@@ -1,0 +1,481 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Apple design tokens (P0)
+ * 真源: ui-reference/apple-style-components/colors_and_type.css
+ * 转换为 HSL 以兼容 shadcn/ui 的 CSS 变量约定
+ * 字体: SF Pro / 系统字体栈，不引入 DM Sans
+ * 仅 light 主题，未实现 dark
+ */
+
+@layer base {
+  :root {
+    /* ===== 背景 / 表面 ===== */
+    --background: 0 0% 100%;          /* #ffffff */
+    --foreground: 240 4% 11%;          /* #1d1d1f */
+
+    --card: 0 0% 100%;                 /* #ffffff */
+    --card-foreground: 240 4% 11%;     /* #1d1d1f */
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 6% 0%;   /* #000000 */
+
+    /* ===== 主色 / 次色 ===== */
+    --primary: 211 100% 50%;           /* #007aff Apple System Blue */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 12% 95%;          /* #f2f2f7 */
+    --secondary-foreground: 240 4% 11%;
+
+    --muted: 240 12% 95%;              /* #f2f2f7 */
+    --muted-foreground: 240 5% 55%;    /* #8e8e93 */
+
+    --accent: 240 25% 98%;             /* #f7f7fa */
+    --accent-foreground: 240 4% 11%;
+
+    /* ===== 状态色（Apple System Colors）===== */
+    --destructive: 6 100% 60%;         /* #ff3b30 */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 64% 45%;            /* #34c759 */
+    --success-foreground: 0 0% 100%;
+
+    --warning: 36 100% 50%;            /* #ff9500 琥珀色，组件库未提供语义琥珀，补充 */
+    --warning-foreground: 0 0% 100%;
+
+    --info: 243 75% 59%;               /* #5856d6 indigo，靛蓝强调 */
+    --info-foreground: 0 0% 100%;
+
+    /* ===== 边框 / 输入 / 焦点 ===== */
+    --border: 240 9% 90%;              /* #e5e5ea */
+    --input: 240 9% 83%;               /* #d1d1d6 */
+    --ring: 211 100% 50%;              /* #007aff */
+
+    /* ===== Sidebar ===== */
+    --sidebar: 240 12% 95%;            /* #f2f2f7 */
+    --sidebar-foreground: 240 4% 11%;
+    --sidebar-primary: 211 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 9% 90%;
+    --sidebar-accent-foreground: 240 4% 11%;
+    --sidebar-border: 240 9% 90%;
+    --sidebar-ring: 211 100% 50%;
+
+    /* ===== Chart token（雷达图、提升 badge）===== */
+    --chart-1: 142 64% 45%;            /* #34c759 - 改前/ready */
+    --chart-2: 211 100% 50%;           /* #007aff - 改后/brand */
+    --chart-3: 36 100% 50%;            /* #ff9500 - 中等优先级/review */
+    --chart-4: 243 75% 59%;            /* #5856d6 - exported/靛蓝强调 */
+    --chart-5: 285 73% 58%;            /* #af52de - 备用 */
+
+    /* ===== Typography ===== */
+    --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
+                 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
+
+    /* ===== Radius / Spacing ===== */
+    --radius: 1.2rem;                  /* ~19.2px，与组件库对齐 */
+    --spacing: 0.24rem;
+
+    /* ===== Workspace 节奏 =====
+     * 统一全产品的阅读路径与视觉节奏
+     * 不再让每个页面自行决定 max-w / px / py
+     */
+    --workspace-maxw: 1200px;          /* 标准内容最大宽度 */
+    --workspace-maxw-wide: 1600px;     /* 宽幅内容最大宽度（History 等数据密度页） */
+    --workspace-px: 32px;              /* 内容左右内边距 (px-8) */
+    --workspace-pt: 24px;              /* 内容距 Header 顶部 (pt-6) */
+    --workspace-pb: 40px;              /* 内容底部留白 (pb-10) */
+    --workspace-gap: 24px;             /* 模块间垂直节奏 (gap-6) */
+    --workspace-gap-sm: 16px;          /* 卡内元素节奏 (gap-4) */
+
+    /* ===== 信息层级 token =====
+     * Apple 风格 L0-L4 五层阅读路径
+     */
+    --tier-breadcrumb: 11px;           /* L0 面包屑：轻、低饱和 */
+    --tier-title: 17px;                /* L1 标题：semibold */
+    --tier-status: 12px;               /* L2 状态徽章 */
+    --tier-hero: 32px;                 /* L3 关键成果数字（hero 摘要带） */
+    --tier-body: 15px;                 /* L4 正文 */
+
+    /* ===== TopBar 几何 =====
+     * TopBar 高度 + 内容距 TopBar 的偏移
+     * sticky 元素须用 --workspace-sticky-top 对齐
+     */
+    --topbar-h: 56px;                  /* h-14 */
+    --workspace-sticky-top: 80px;      /* topbar + pt */
+  }
+
+  /* ===== Dark theme =====
+   * 与 :root 一一对应；保持与 shadcn/ui 变量约定一致。
+   * 仅在 html.dark 时生效（由 ThemeProvider 控制）。
+   */
+  .dark {
+    /* ===== 背景 / 表面 ===== */
+    --background: 220 14% 10%;
+    --foreground: 210 20% 92%;
+
+    --card: 220 14% 12%;
+    --card-foreground: 210 20% 92%;
+
+    --popover: 220 14% 12%;
+    --popover-foreground: 210 20% 92%;
+
+    /* ===== 主色 / 次色 ===== */
+    --primary: 210 100% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 16%;
+    --secondary-foreground: 210 20% 92%;
+
+    --muted: 220 14% 16%;
+    --muted-foreground: 215 16% 65%;
+
+    --accent: 220 14% 16%;
+    --accent-foreground: 210 20% 92%;
+
+    /* ===== 状态色 ===== */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 35 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --info: 243 75% 65%;
+    --info-foreground: 0 0% 100%;
+
+    /* ===== 边框 / 输入 / 焦点 ===== */
+    --border: 220 14% 20%;
+    --input: 220 14% 18%;
+    --ring: 210 100% 50%;
+
+    /* ===== Sidebar ===== */
+    --sidebar: 220 14% 8%;
+    --sidebar-foreground: 210 20% 92%;
+    --sidebar-primary: 210 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 16%;
+    --sidebar-accent-foreground: 210 20% 92%;
+    --sidebar-border: 220 14% 18%;
+    --sidebar-ring: 210 100% 50%;
+
+    /* ===== Chart token（暗色模式下提亮，保证可读）===== */
+    --chart-1: 142 64% 55%;
+    --chart-2: 211 100% 60%;
+    --chart-3: 36 100% 55%;
+    --chart-4: 243 75% 68%;
+    --chart-5: 285 73% 65%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  /* 滚动条 - 细而克制 */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--background-300, 240 9% 90%));
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground));
+  }
+
+  /* 焦点可见性 */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* ===== Workspace 容器语义 =====
+   * 统一全产品的内容区节奏，替代散落的 mx-auto max-w-6xl px-8 py-X
+   * - .workspace         标准内容区（1200px）
+   * - .workspace--wide   宽幅内容区（1600px，History 等数据密度页）
+   * - .workspace--full   撑满（Brand Facts 双栏布局）
+   * 所有变体共享 pt/pb/gap 节奏
+   */
+  .workspace {
+    max-width: var(--workspace-maxw);
+    margin-inline: auto;
+    padding: var(--workspace-pt) var(--workspace-px) var(--workspace-pb);
+  }
+  .workspace--wide {
+    max-width: var(--workspace-maxw-wide);
+    margin-inline: auto;
+    padding: var(--workspace-pt) var(--workspace-px) var(--workspace-pb);
+  }
+  .workspace--full {
+    max-width: 100%;
+    padding: var(--workspace-pt) var(--workspace-px) var(--workspace-pb);
+  }
+
+  /* 模块间垂直节奏：父子均用此 gap，禁止子元素 mt-* 互相堆叠 */
+  .workspace-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--workspace-gap);
+  }
+  .workspace-stack-sm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--workspace-gap-sm);
+  }
+
+  /* sticky 偏移：所有 sticky 元素统一用此变量，避免 72/80 漂移 */
+  .workspace-sticky {
+    position: sticky;
+    top: var(--workspace-sticky-top);
+    max-height: calc(100vh - var(--workspace-sticky-top) - var(--workspace-gap));
+    overflow-y: auto;
+  }
+
+  /* eyebrow / meta label - 复用 component-card 的 eyebrow 样式 */
+  .text-eyebrow {
+    color: hsl(var(--muted-foreground));
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  /* tabular 数字 - 复用 product-grid 的 price 样式 */
+  .nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  /* Markdown 容器排版（react-markdown 渲染后）
+   * 优化阅读体验：正文字号 16px、行距 1.85、段落间距 16px，
+   * H2/H3 层级突出，列表/引用/表格可读性增强。
+   * 提供两档变体：默认（正文阅读）与 .prose-apple-compact（原文对比等紧凑场景）。
+   */
+  .prose-apple {
+    color: hsl(var(--foreground));
+    line-height: 1.85;
+    font-size: 16px;
+    word-break: break-word;
+  }
+  .prose-apple h1,
+  .prose-apple h2,
+  .prose-apple h3,
+  .prose-apple h4 {
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.35;
+    color: hsl(var(--foreground));
+  }
+  .prose-apple h1 {
+    font-size: 1.6em;
+    margin-top: 1.6em;
+    margin-bottom: 0.7em;
+  }
+  .prose-apple h2 {
+    font-size: 1.375em; /* ~22px */
+    font-weight: 700;
+    margin-top: 2em;
+    margin-bottom: 0.85em;
+    line-height: 1.35;
+  }
+  .prose-apple h3 {
+    font-size: 1.125em; /* ~18px */
+    font-weight: 650;
+    margin-top: 1.5em;
+    margin-bottom: 0.6em;
+    line-height: 1.45;
+  }
+  .prose-apple h4 {
+    font-size: 1em;
+    font-weight: 650;
+    margin-top: 1.2em;
+    margin-bottom: 0.5em;
+  }
+  .prose-apple p {
+    margin: 0 0 16px;
+  }
+  .prose-apple p:last-child {
+    margin-bottom: 0;
+  }
+  .prose-apple ul,
+  .prose-apple ol {
+    margin: 12px 0 18px;
+    padding-left: 22px;
+    line-height: 1.8;
+  }
+  .prose-apple li {
+    margin-bottom: 8px;
+  }
+  .prose-apple li:last-child {
+    margin-bottom: 0;
+  }
+  .prose-apple ul li {
+    list-style: disc;
+  }
+  .prose-apple ol li {
+    list-style: decimal;
+  }
+  .prose-apple a {
+    color: hsl(var(--primary));
+    text-decoration: none;
+  }
+  .prose-apple a:hover {
+    text-decoration: underline;
+  }
+  .prose-apple strong {
+    font-weight: 650;
+    color: hsl(var(--foreground));
+  }
+  .prose-apple code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: hsl(var(--secondary));
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+  }
+  .prose-apple pre {
+    background: hsl(240 6% 11%);
+    color: hsl(0 0% 96%);
+    padding: 1em 1.2em;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    margin: 1em 0;
+    font-size: 0.875em;
+    line-height: 1.6;
+  }
+  .prose-apple pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+  }
+  .prose-apple blockquote {
+    border-left: 3px solid hsl(var(--border));
+    background: hsl(var(--secondary) / 0.5);
+    padding: 12px 16px;
+    border-radius: 8px;
+    color: hsl(var(--muted-foreground));
+    margin: 16px 0;
+  }
+  .prose-apple blockquote p {
+    margin: 0 0 8px;
+  }
+  .prose-apple blockquote p:last-child {
+    margin-bottom: 0;
+  }
+  .prose-apple table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2em 0;
+    font-size: 14px;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .prose-apple thead,
+  .prose-apple tbody,
+  .prose-apple tr,
+  .prose-apple th,
+  .prose-apple td {
+    display: revert;
+    white-space: normal;
+  }
+  .prose-apple th,
+  .prose-apple td {
+    border: 1px solid hsl(var(--border));
+    padding: 0.6em 0.9em;
+    text-align: left;
+  }
+  .prose-apple th {
+    background: hsl(var(--secondary));
+    font-weight: 600;
+  }
+  .prose-apple hr {
+    border: 0;
+    border-top: 1px solid hsl(var(--border));
+    margin: 2em 0;
+  }
+
+  /* 紧凑变体：用于原文对比等需要较小字号的场景 */
+  .prose-apple-compact {
+    font-size: 14.5px;
+    line-height: 1.75;
+  }
+  .prose-apple-compact p {
+    margin-bottom: 12px;
+  }
+  .prose-apple-compact h2 {
+    font-size: 1.2em;
+    margin-top: 1.4em;
+    margin-bottom: 0.6em;
+  }
+  .prose-apple-compact h3 {
+    font-size: 1.05em;
+    margin-top: 1.1em;
+    margin-bottom: 0.5em;
+  }
+  .prose-apple-compact ul,
+  .prose-apple-compact ol {
+    margin: 8px 0 12px;
+    line-height: 1.7;
+  }
+  .prose-apple-compact li {
+    margin-bottom: 4px;
+  }
+  .prose-apple-compact blockquote {
+    padding: 10px 12px;
+    margin: 10px 0;
+  }
+
+  /* FAQ 模块样式：问答分隔 + 问题加粗，区分于普通正文 */
+  .prose-apple-faq h3 {
+    font-size: 1.05em;
+    font-weight: 700;
+    color: hsl(var(--foreground));
+    margin-top: 20px;
+    margin-bottom: 8px;
+    padding-top: 16px;
+    border-top: 1px solid hsl(var(--border));
+  }
+  .prose-apple-faq h3:first-child {
+    border-top: 0;
+    padding-top: 0;
+    margin-top: 0;
+  }
+  .prose-apple-faq h2 {
+    font-size: 1.25em;
+    margin-top: 24px;
+    margin-bottom: 12px;
+  }
+  .prose-apple-faq p {
+    margin-bottom: 12px;
+  }
+}

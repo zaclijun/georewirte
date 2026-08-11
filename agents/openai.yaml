@@ -1,0 +1,7 @@
+interface:
+  display_name: "GEO Rewrite"
+  short_description: "Score and rewrite articles for GEO"
+  default_prompt: "Use $geo-rewrite to score and rewrite this article for GEO, preserving facts while improving AI citation readiness and structure."
+  brand_color: "#D71920"
+policy:
+  allow_implicit_invocation: true

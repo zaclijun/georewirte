@@ -1,0 +1,1 @@
+export { BrandFactCard } from './BrandFactCard'
