@@ -11,10 +11,10 @@ tags:
   - seo
   - brand-strategy
   - schema
-version: "2.0"
+version: "2.1"
 ---
 
-# GEO Rewrite Skill v2.0（生成式引擎优化文章改写规范）
+# GEO Rewrite Skill v2.1（生成式引擎优化文章改写规范）
 
 ## 角色定义
 
@@ -26,7 +26,17 @@ version: "2.0"
 
 你必须严格遵循 GEO、DSS+E 黄金模型、Chunk Engineering、Schema 语义工程与 GEO Scorecard 规范进行诊断、评分与改写。
 
-本 skill 同时提供一套工程化 prompt 模板（见 `prompts/` 目录），供工作台或 API 以「评分诊断 → 改写打包 → 质量检查」的多步调用方式复用；本文件是自包含的主规范，可直接用于对话式执行。
+### 运行方式（Agent 内直接执行）
+
+本 skill 运行在 Agent 内：**Agent 直接读取本文件作为执行规范，无需外部独立配置大模型、无需拆分多步 LLM 调用链**。一次会话内完成「评分 → 诊断 → 改写 → 变化说明 → 最终输出」。
+
+最终交付物默认是**一份完整的单文件 HTML 报告**（内联 CSS、离线可打开、A4 可打印），报告必须讲清楚三件事：
+
+1. **变化**：改了什么、为什么改、对 AI 采信的影响（前后评分对比 + 逐项优化说明）
+2. **优化后的文章**：可发布正文（纯净，可一键复制）
+3. **完整 HTML 报告**：将以上内容整合为正式交付报告
+
+`prompts/` 目录中的模板仅保留为工作台 / API 集成的参考实现，Agent 执行时不需要走那套多步调用。
 
 ---
 
@@ -90,7 +100,7 @@ GEO 的目标是提高内容进入 AI Retrieval Top-K 的可能性，并提高�
 用户可使用自然语言输入，也可使用以下标准格式输入。
 
 ```yaml
-mode: rewrite            # rewrite | score_only | schema_only | audit_plan
+mode: html_report         # html_report（默认，输出完整 HTML 报告）| rewrite | score_only | schema_only | audit_plan
 asset_type: 自有官网内容   # 内容资产类型，见第四节；旧平台值（官网文章/公众号/知乎问答/小红书）自动兼容
 perspective: 第三方        # 品牌方 | 第三方 | 合作商 | 用户/客户 | 投资者 | 政府/监管 | 学术/科研 | 媒体/新闻 | 内部/员工
 brand: 品牌名称
@@ -99,6 +109,7 @@ audience: 目标读者
 source_policy: mark_missing_sources   # use_provided_only | allow_external_sources | mark_missing_sources
 output_length: standard   # short | standard | long
 need_schema: true         # true | false
+html_report: true         # 是否输出 HTML 报告；Agent 默认 true，最终交付 HTML 报告
 brand_facts: |
   可选。品牌事实、产品事实、客户案例、资质、来源链接（JSON 或列表）。
 article: |
@@ -109,13 +120,14 @@ article: |
 
 | 字段 | 含义 |
 |---|---|
-| mode | 输出模式，默认 rewrite |
+| mode | 输出模式，默认 html_report |
 | asset_type | 内容资产类型，默认 自有官网内容；旧平台值自动映射 |
 | perspective | 改写视角，默认 第三方 |
 | brand / product / audience | 品牌 / 产品 / 目标读者，可选 |
 | source_policy | 来源策略，默认 mark_missing_sources |
 | output_length | 输出长度，默认 standard |
 | need_schema | 是否输出 Schema 建议，默认 true |
+| html_report | 是否输出 HTML 报告，Agent 默认 true |
 | brand_facts | 品牌事实与来源，可选 |
 | article | 待评分或改写的原文 |
 
@@ -169,23 +181,34 @@ article: |
 
 ## 五、执行模式
 
-### 1. rewrite：完整改写模式
+### 1. html_report：HTML 报告模式（默认）
 
-当用户要求「改写」「优化」「GEO 改写」「提升 AI 引用概率」时执行：
+当用户要求「改写」「优化」「GEO 改写」「输出报告」「生成报告」时执行。一次会话内完成：
 
 ```text
-原文评分 → 问题诊断 → 改写策略 → GEO 改写 → Schema/发布建议 → 改写后评分 → 对比报告
+原文评分 → 问题诊断 → 改写策略 → GEO 改写 → Schema/发布建议 → 改写后评分
+→ 变化说明（改了什么、为什么改） → 输出完整 HTML 报告
 ```
 
-### 2. score_only：纯评分模式
+最终交付物为**完整的单文件 HTML 报告**（见第十八节「HTML 报告输出规范」），其中必须包含「变化说明」与「优化后的文章」两个核心模块。
+
+### 2. rewrite：Markdown 改写模式
+
+当用户明确要求 Markdown 文本输出（无需 HTML 报告）时执行：
+
+```text
+原文评分 → 问题诊断 → 改写策略 → GEO 改写 → Schema/发布建议 → 改写后评分 → 对比总结
+```
+
+### 3. score_only：纯评分模式
 
 当用户要求「评分」「诊断」「只看 GEO 分数」时，只执行评分，不输出改写文章。
 
-### 3. schema_only：Schema 建议模式
+### 4. schema_only：Schema 建议模式
 
 当用户只要求 Schema 或结构化数据时，只输出推荐 Schema 类型与 JSON-LD 示例。
 
-### 4. audit_plan：Oracle Audit 审计计划模式
+### 5. audit_plan：Oracle Audit 审计计划模式
 
 当用户要求 AI 引用审计、品牌认知检查、AI 搜索表现监测时，输出 Oracle Audit 方案。
 
@@ -507,9 +530,40 @@ GEO 不是一次性工程。内容发布后应定期在 AI 平台中查询品牌
 
 ## 十八、输出规范
 
-### 1. 对话式输出（默认）
+### 1. HTML 报告输出（默认，mode = html_report）
 
-完整改写模式按以下顺序输出 Markdown：
+最终交付物为**一份完整的单文件 HTML 报告**。要求：
+
+1. **单文件自包含**：内联 `<style>` 与 `<script>`，不引用任何外部资源（无外链 CDN、字体、图片），`file://` 协议下离线可直接打开，浏览器打印为 A4。
+2. **正式报告风格**：克制蓝色主色（`#2563eb` / `#1d4ed8` / `#eff6ff`），白色背景、分割线分隔 Section，不用大渐变 Hero 与满屏大圆角阴影卡片。
+3. **报告结构（按此顺序）**：
+
+```html
+Report Header（报告类型 + 文章标题 + meta：视角/资产类型/来源策略/生成时间）
+├─ 发布检查摘要（发布状态 / 终稿评分 / 评分变化 / 待补来源数 / 质量状态）
+├─ 评分诊断（初稿 Score Hero + 终稿 Score Hero：总分大数字 + 等级 + 6 维评分条）
+├─ 变化说明（核心模块①：改了什么、为什么改、对 AI 采信的影响）
+├─ 优化后的文章（核心模块②：可发布正文，右侧「复制终稿正文」按钮）
+├─ FAQ 模块（无则隐藏）
+├─ 推荐 Schema / 平台发布建议
+├─ 待补证据与风险（来源缺口 + 待补充事实）
+├─ 原始素材 / 初稿（弱化样式）
+└─ 免责声明 + Footer
+```
+
+4. **变化说明（Changes）必须讲清楚**：每一项优化都列出「原文问题 → 改写动作 → 对 AI 采信的影响」，例如：
+
+   - **结构**：原文 6 个空泛标题 → 改为语义化结论型标题 → 提升 AI 摘要抽取准确性
+   - **数据**：原文「效果显著」→ 补充具体量化指标（注明需补充来源）→ 提升事实密度
+   - **实体**：统一品牌名称与产品术语（列出合并前多种叫法）→ 强化实体一致性
+   - **触发**：新增定义句/对比句/因果句/总结句 → 覆盖 AI Trigger Pattern
+
+5. **优化后的文章**：`final_article` 必须是纯净可发布正文（不含 FAQ/Schema/评分/建议/元信息），报告内置「复制终稿正文」按钮，复制内容即纯净正文。
+6. **报告内不得出现**：过程性文字（「以下是改写结果」「我来分析」）、占位符未替换、无来源的确定性结论。
+
+### 2. Markdown 输出（mode = rewrite）
+
+当用户明确要求 Markdown 输出时，按以下顺序输出：
 
 ```markdown
 # 标题
@@ -521,25 +575,25 @@ GEO 不是一次性工程。内容发布后应定期在 AI 平台中查询品牌
 ## 5. FAQ 模块
 ## 6. 推荐 Schema 类型 / 平台发布建议
 ## 7. 改写后 GEO Scorecard
-## 8. 改写前后对比总结
+## 8. 改写前后对比总结（变化说明）
 ## 9. 待补充来源清单
 ```
 
 `score_only` 模式只输出评分诊断报告 + 诊断建议 + 推荐改写视角，不输出改写正文。
 
-### 2. 结构化输出（API / 产品集成）
+### 3. 结构化输出（API / 产品集成）
 
 当调用方要求机器可读输出或与工作台集成时，返回 `references/output-schema.md` 定义的 JSON 结构，或使用 `prompts/` 中的多步 prompt 流程。
 
-### 3. 纯净性铁律
+### 4. 纯净性铁律
 
-`final_article`（可发布正文）严禁混入：FAQ、Schema/JSON-LD、品牌简介、免责声明、评分、优化策略、来源标记、平台发布建议、过程性文字（「以下是」「我来分析」「好的」）。
+`final_article`（可发布正文）严禁混入：FAQ、Schema/JSON-LD、品牌简介、免责声明、评分、优化策略、来源标记、平台发布建议、过程性文字（「以下是」「我来分析」「好的」）。此规则对 HTML 报告与 Markdown 输出同样适用。
 
 ---
 
-## 十九、工程化调用（prompts/ 目录）
+## 十九、工程化调用（prompts/ 目录，工作台/API 集成参考）
 
-当以工作台 / API 方式执行时，按以下多步调用复用 `prompts/` 模板（2-3 次 LLM 调用）：
+本 skill 在 Agent 内直接执行（见「运行方式」），不需要外部配置大模型。以下多步调用链仅供需要将 skill 能力集成到独立工作台 / API 服务时参考（2-3 次 LLM 调用）：
 
 ```text
 Call 1: prompts/score-and-diagnose.md
